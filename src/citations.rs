@@ -11,6 +11,8 @@ use axum::response::{IntoResponse, Response};
 struct CitationsQuery {
     author: Option<String>,
     source: Option<String>,
+    page_size:u8,
+    page:u32
 }
 
 #[derive(Serialize)]
@@ -19,7 +21,9 @@ struct CitationsResponse {
 }
 #[derive(Serialize)]
 struct Citation {
+    citation_id:i64,
     author: String,
+    rizz:i64,
     source: String,
     body: String,
 }
@@ -32,19 +36,22 @@ pub fn get_router() -> Router<Pool<Sqlite>> {
 
 async fn citations(
     State(pool): State<Pool<Sqlite>>,
-    Query(CitationsQuery { author, source }): Query<CitationsQuery>,
+    Query(CitationsQuery { author, source, page_size, page }): Query<CitationsQuery>,
 ) -> Result<CitationsResponse> {
     let author = author.unwrap_or_default();
     let source = source.unwrap_or_default();
     let citations = sqlx::query_as!(
         Citation,
         "
-    SELECT author,source,body FROM citations
+    SELECT citation_id,author,source,rizz,body FROM citations
     WHERE author LIKE ? AND source LIKE ?
-    ORDER BY author
+    ORDER BY rizz DESC
+    LIMIT ? OFFSET ?
 ",
         format!("{}%",author),
-        format!("{}%",source)
+        format!("{}%",source),
+        page_size,
+        page*page_size as u32
     ).fetch_all(&pool).await?;
 
      Ok(CitationsResponse{citations})
