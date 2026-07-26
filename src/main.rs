@@ -1,6 +1,7 @@
-mod posts;
+mod citations;
 mod error;
 pub mod macros;
+mod posts;
 
 use anyhow::Result;
 use sqlx::sqlite::SqlitePoolOptions;
@@ -12,7 +13,9 @@ async fn main() -> Result<()> {
         .connect("sqlite:mydb.db")
         .await?;
 
-    let router = posts::get_router().with_state(connection);
+    let router = posts::get_router()
+        .merge(citations::get_router())
+        .with_state(connection);
 
     let listener = tokio::net::TcpListener::bind("localhost:8080").await?;
     axum::serve(listener, router).await?;
