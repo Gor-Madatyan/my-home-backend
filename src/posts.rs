@@ -1,12 +1,13 @@
 use crate::error::{AppError, Result};
 use anyhow::anyhow;
 use axum::Router;
-use axum::extract::State;
+use axum::extract::{Path, State};
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum_extra::extract::Query;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Sqlite};
+use crate::serialize_into_request;
 
 #[derive(Serialize)]
 struct PostPreview {
@@ -15,6 +16,18 @@ struct PostPreview {
     summary: String,
     upload_date: String,
     revision_date: String,
+    likes: i64,
+}
+
+#[derive(Serialize)]
+struct Post {
+    post_id: i64,
+    title: String,
+    summary: String,
+    upload_date: String,
+    revision_date: String,
+    body: String,
+    tags: sqlx::types::Json<Vec<String>>,
     likes: i64,
 }
 
@@ -32,26 +45,43 @@ struct PostsPreviewResponse {
     posts: Vec<PostPreview>,
 }
 
-impl IntoResponse for PostsPreviewResponse {
-    fn into_response(self) -> Response {
-        serde_json::to_string(&self)
-            .map_err(|e| AppError::from(e))
-            .into_response()
-    }
+#[derive(Serialize)]
+struct PostResponse {
+    post: Post,
 }
 
+serialize_into_request!{PostsPreviewResponse, PostResponse}
+
 pub fn get_router() -> Router<Pool<Sqlite>> {
-    Router::new().route("/posts", get(posts)).route("/posts/{postid}",get(||async { todo!("do something") }))
+    Router::new()
+        .route("/posts", get(posts))
+        .route("/posts/{postid}", get(get_post))
+}
+
+async fn get_post(State(pool): State<Pool<Sqlite>>, Path(post_id): Path<u32>) -> Result<PostResponse> {
+    let post = sqlx::query_as!(
+        Post,
+    "
+    SELECT  b.*, json_group_array(t.tag_name) FILTER (WHERE t.tag_name IS NOT NULL) AS 'tags!: sqlx::types::Json<Vec<String>>'
+    FROM blog_posts b
+    LEFT JOIN posts_tags pt USING(post_id)
+    LEFT JOIN tags t USING(tag_id)
+    WHERE b.post_id = ?
+    GROUP BY b.post_id;
+",post_id).fetch_one(&pool).await?;
+    Ok(PostResponse {
+        post
+    })
 }
 
 async fn posts(
     State(pool): State<Pool<Sqlite>>,
     Query(PostsPreviewQuery {
-        page_size,
-        page,
-        search,
-        tag,
-    }): Query<PostsPreviewQuery>,
+              page_size,
+              page,
+              search,
+              tag,
+          }): Query<PostsPreviewQuery>,
 ) -> Result<PostsPreviewResponse> {
     let posts = if let Some(search) = search {
         if tag.len() > 0 {
@@ -86,8 +116,8 @@ async fn select_page(
             page_size,
             page * page_size as u32
         )
-        .fetch_all(&pool)
-        .await?
+            .fetch_all(&pool)
+            .await?
     } else {
         sqlx::query_as!(
             PostPreview,
@@ -126,8 +156,8 @@ async fn fulltext_search(
         page_size,
         page * page_size as u32
     )
-    .fetch_all(&pool)
-    .await?;
+        .fetch_all(&pool)
+        .await?;
 
     Ok(posts)
 }

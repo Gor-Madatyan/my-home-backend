@@ -1,5 +1,6 @@
 mod posts;
 mod error;
+pub mod macros;
 
 use anyhow::Result;
 use sqlx::sqlite::SqlitePoolOptions;
