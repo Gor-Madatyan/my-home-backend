@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS citations
     body        TEXT    NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_citations_author ON citations (rizz DESC);
+CREATE INDEX IF NOT EXISTS idx_citations_rizz ON citations (rizz DESC);
 CREATE INDEX IF NOT EXISTS idx_citations_author ON citations (author, source);
 CREATE INDEX IF NOT EXISTS idx_citations_source ON citations (source);
 COMMIT;
