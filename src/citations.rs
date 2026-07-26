@@ -4,7 +4,7 @@ use axum::routing::get;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Sqlite};
 use crate::error::{Result,AppError};
-use crate::serialize_into_request;
+use crate::{sanitize, serialize_into_request};
 use axum::response::{IntoResponse, Response};
 
 #[derive(Deserialize)]
@@ -40,6 +40,7 @@ async fn citations(
 ) -> Result<CitationsResponse> {
     let author = author.unwrap_or_default();
     let source = source.unwrap_or_default();
+    sanitize!{author,source}
     let citations = sqlx::query_as!(
         Citation,
         "

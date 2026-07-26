@@ -7,7 +7,7 @@ use axum::routing::get;
 use axum_extra::extract::Query;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Sqlite};
-use crate::serialize_into_request;
+use crate::{sanitize, serialize_into_request};
 
 #[derive(Serialize)]
 struct PostPreview {
@@ -141,7 +141,7 @@ async fn fulltext_search(
     page: u32,
     search: String,
 ) -> Result<Vec<PostPreview>> {
-    let search = format!("\"{}\"", search.replace("\"", "\"\""));
+    sanitize!{search}
     let posts = sqlx::query_as!(
         PostPreview,
         "

@@ -12,3 +12,12 @@ macro_rules! serialize_into_request {
         )*
     };
 }
+
+#[macro_export]
+macro_rules! sanitize {
+    ($($name:ident),*) => {
+        $(
+         let $name = format!("\"{}\"", $name.replace("\"", "\"\""));
+        )*
+    }
+}
