@@ -98,4 +98,13 @@ CREATE TABLE IF NOT EXISTS citations
 CREATE INDEX IF NOT EXISTS idx_citations_rizz ON citations (rizz DESC);
 CREATE INDEX IF NOT EXISTS idx_citations_author ON citations (author, source);
 CREATE INDEX IF NOT EXISTS idx_citations_source ON citations (source);
+
+CREATE TABLE IF NOT EXISTS portfolio(
+  project_id INTEGER PRIMARY KEY,
+  project_name TEXT NOT NULL UNIQUE,
+  rizz INTEGER NOT NULL,
+  note TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_portfolio_rizz ON portfolio (rizz DESC);
 COMMIT;
