@@ -1,11 +1,11 @@
+use crate::error::{AppError, Result};
+use crate::serialize_into_request;
 use axum::Router;
 use axum::extract::{Query, State};
+use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Sqlite};
-use crate::error::{Result,AppError};
-use crate::{sanitize, serialize_into_request};
-use axum::response::{IntoResponse, Response};
 
 #[derive(Deserialize)]
 struct CitationsQuery {
@@ -19,7 +19,7 @@ struct CitationsQuery {
 struct CitationsResponse {
     citations: Vec<Citation>,
 }
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 struct Citation {
     citation_id:i64,
     author: String,
@@ -40,7 +40,6 @@ async fn citations(
 ) -> Result<CitationsResponse> {
     let author = author.unwrap_or_default();
     let source = source.unwrap_or_default();
-    sanitize!{author,source}
     let citations = sqlx::query_as!(
         Citation,
         "
@@ -54,6 +53,5 @@ async fn citations(
         page_size,
         page*page_size as u32
     ).fetch_all(&pool).await?;
-
      Ok(CitationsResponse{citations})
 }
