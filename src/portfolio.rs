@@ -11,7 +11,6 @@ use sqlx::{Pool, Sqlite};
 struct Project {
     project_id: i64,
     project_name: String,
-    rizz: i64,
     note: String,
 }
 
@@ -30,7 +29,7 @@ async fn get_portfolio(State(pool): State<Pool<Sqlite>>) -> Result<PortfolioResp
     let portfolio = sqlx::query_as!(
         Project,
         "
-        SELECT * FROM portfolio
+        SELECT project_id, project_name, note FROM portfolio
         ORDER BY rizz
 "
     )
