@@ -2,6 +2,7 @@ mod citations;
 mod error;
 pub mod macros;
 mod posts;
+mod portfolio;
 
 use anyhow::Result;
 use sqlx::sqlite::SqlitePoolOptions;
@@ -15,6 +16,7 @@ async fn main() -> Result<()> {
 
     let router = posts::get_router()
         .merge(citations::get_router())
+        .merge(portfolio::get_router())
         .with_state(connection);
 
     let listener = tokio::net::TcpListener::bind("localhost:8080").await?;
