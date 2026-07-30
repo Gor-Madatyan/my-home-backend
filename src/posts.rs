@@ -1,13 +1,13 @@
 use crate::error::{AppError, Result};
+use crate::{sanitize, serialize_into_request};
 use anyhow::anyhow;
 use axum::Router;
 use axum::extract::{Path, State};
 use axum::response::{IntoResponse, Response};
-use axum::routing::get;
+use axum::routing::{get, put};
 use axum_extra::extract::Query;
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Sqlite};
-use crate::{sanitize, serialize_into_request};
+use sqlx::{Executor, Pool, Sqlite};
 
 #[derive(Serialize)]
 struct PostPreview {
@@ -50,15 +50,20 @@ struct PostResponse {
     post: Post,
 }
 
-serialize_into_request!{PostsPreviewResponse, PostResponse}
+serialize_into_request! {PostsPreviewResponse, PostResponse}
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new()
         .route("/posts", get(posts))
         .route("/posts/{postid}", get(get_post))
+        .route("/posts/{postid}/like", put(like_post))
+        .route("/posts/{postid}/unlike", put(unlike_post))
 }
 
-async fn get_post(State(pool): State<Pool<Sqlite>>, Path(post_id): Path<u32>) -> Result<PostResponse> {
+async fn get_post(
+    State(pool): State<Pool<Sqlite>>,
+    Path(post_id): Path<u32>,
+) -> Result<PostResponse> {
     let post = sqlx::query_as!(
         Post,
     "
@@ -69,19 +74,39 @@ async fn get_post(State(pool): State<Pool<Sqlite>>, Path(post_id): Path<u32>) ->
     WHERE b.post_id = ?
     GROUP BY b.post_id;
 ",post_id).fetch_one(&pool).await?;
-    Ok(PostResponse {
-        post
-    })
+    Ok(PostResponse { post })
+}
+
+async fn like_post(State(pool): State<Pool<Sqlite>>, Path(post_id): Path<u32>) -> Result<()> {
+    pool.execute(sqlx::query_as!(
+        Post,
+    "
+    UPDATE blog_posts
+    SET likes = likes+1
+    WHERE post_id = ?
+",post_id)).await?;
+    Ok(())
+}
+
+async fn unlike_post(State(pool): State<Pool<Sqlite>>, Path(post_id): Path<u32>) -> Result<()> {
+    pool.execute(sqlx::query_as!(
+        Post,
+    "
+    UPDATE blog_posts
+    SET likes = MAX(0,likes-1)
+    WHERE post_id = ?
+",post_id)).await?;
+    Ok(())
 }
 
 async fn posts(
     State(pool): State<Pool<Sqlite>>,
     Query(PostsPreviewQuery {
-              page_size,
-              page,
-              search,
-              tag,
-          }): Query<PostsPreviewQuery>,
+        page_size,
+        page,
+        search,
+        tag,
+    }): Query<PostsPreviewQuery>,
 ) -> Result<PostsPreviewResponse> {
     let posts = if let Some(search) = search {
         if tag.len() > 0 {
@@ -116,8 +141,8 @@ async fn select_page(
             page_size,
             page * page_size as u32
         )
-            .fetch_all(&pool)
-            .await?
+        .fetch_all(&pool)
+        .await?
     } else {
         sqlx::query_as!(
             PostPreview,
@@ -129,8 +154,8 @@ async fn select_page(
             page_size,
             page * page_size as u32
         )
-            .fetch_all(&pool)
-            .await?
+        .fetch_all(&pool)
+        .await?
     };
 
     Ok(posts)
@@ -141,7 +166,7 @@ async fn fulltext_search(
     page: u32,
     search: String,
 ) -> Result<Vec<PostPreview>> {
-    sanitize!{search}
+    sanitize! {search}
     let posts = sqlx::query_as!(
         PostPreview,
         "
@@ -156,8 +181,8 @@ async fn fulltext_search(
         page_size,
         page * page_size as u32
     )
-        .fetch_all(&pool)
-        .await?;
+    .fetch_all(&pool)
+    .await?;
 
     Ok(posts)
 }
