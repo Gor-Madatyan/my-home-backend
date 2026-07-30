@@ -110,7 +110,7 @@ async fn select_page(
         INNER JOIN posts_tags USING(post_id)
         INNER JOIN tags USING(tag_id)
         WHERE tag_name IN (SELECT value FROM json_each(?))
-        ORDER BY upload_date LIMIT ? OFFSET ?
+        ORDER BY upload_date DESC LIMIT ? OFFSET ?
     ",
             serde_json::to_string(&tags).unwrap(),
             page_size,
