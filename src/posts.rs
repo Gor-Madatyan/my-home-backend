@@ -124,7 +124,7 @@ async fn select_page(
             "
         SELECT post_id,title,summary,upload_date,revision_date,likes
         FROM blog_posts
-        ORDER BY upload_date LIMIT ? OFFSET ?
+        ORDER BY revision_date DESC LIMIT ? OFFSET ?
     ",
             page_size,
             page * page_size as u32
