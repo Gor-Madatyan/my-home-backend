@@ -1,9 +1,9 @@
+use axum::Json;
 use axum::Router;
 use axum::extract::{Path, State};
 use axum::routing::{delete, put};
-use axum::Json;
-use furniture::portfolio::ProjectDraft;
 use furniture::error::Result;
+use furniture::portfolio::ProjectDraft;
 use sqlx::{Pool, Sqlite};
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
@@ -25,7 +25,6 @@ async fn put_project(
             draft.note
         )
         .execute(&pool)
-        .await?;
     } else {
         sqlx::query!(
             "INSERT OR REPLACE INTO portfolio (rizz, project_name, note) VALUES (?, ?, ?)",
@@ -34,8 +33,7 @@ async fn put_project(
             draft.note
         )
         .execute(&pool)
-        .await?;
-    }
+    } .await?;
     Ok(())
 }
 
@@ -43,11 +41,8 @@ async fn delete_project(
     State(pool): State<Pool<Sqlite>>,
     Path(project_path): Path<u32>,
 ) -> Result<()> {
-    sqlx::query!(
-        "DELETE FROM portfolio WHERE project_id = ?",
-        project_path
-    )
-    .execute(&pool)
-    .await?;
+    sqlx::query!("DELETE FROM portfolio WHERE project_id = ?", project_path)
+        .execute(&pool)
+        .await?;
     Ok(())
 }

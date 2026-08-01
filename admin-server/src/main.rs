@@ -1,4 +1,5 @@
 mod citations;
+mod portfolio;
 
 use sqlx::sqlite::SqlitePoolOptions;
 
@@ -9,7 +10,9 @@ async fn main() -> anyhow::Result<()> {
         .connect("sqlite:mydb.db")
         .await?;
 
-    let router = citations::get_router().with_state(connection);
+    let router = citations::get_router()
+        .merge(portfolio::get_router())
+        .with_state(connection);
 
     let listener = tokio::net::TcpListener::bind("localhost:9090").await?;
     axum::serve(listener, router).await?;
