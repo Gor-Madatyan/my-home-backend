@@ -17,11 +17,26 @@ pub struct CitationsResponse {
 }
 #[derive(Serialize, Debug)]
 pub struct Citation {
-    pub citation_id:i64,
+    pub citation_id:u32,
     pub author: String,
-    pub rizz:i64,
+    pub rizz:u16,
     pub source: String,
     pub body: String,
 }
 
-serialize_into_request!{CitationsResponse}
+#[derive(Deserialize, Debug)]
+pub struct CitationDraft {
+    pub citation_id:Option<u32>,
+    pub author: String,
+    pub rizz:u16,
+    pub source: String,
+    pub body: String,
+}
+
+
+#[derive(Serialize)]
+pub struct CitationResponse {
+    pub citation: Citation,
+}
+
+serialize_into_request!{CitationsResponse, CitationResponse}

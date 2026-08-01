@@ -26,7 +26,6 @@ async fn put_citation(
             draft.body
         )
         .execute(&pool)
-        .await?;
     } else {
         sqlx::query!(
             "INSERT OR REPLACE INTO citations (author, rizz, source, body) VALUES (?, ?, ?, ?)",
@@ -36,8 +35,7 @@ async fn put_citation(
             draft.body
         )
         .execute(&pool)
-        .await?;
-    }
+    }.await?;
     Ok(())
 }
 
