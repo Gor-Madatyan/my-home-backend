@@ -6,7 +6,7 @@ All endpoints are intended for internal administrative use only.
 
 ## Common Conventions
 
-- **Authentication**: Not required in the current implementation.
+- **Authentication**: Required. All requests must include an `X-API-KEY` header with the value of the API key configured in the server environment variable `API_KEY`. Requests without a valid key are rejected with `HTTP 401 Unauthorized`.
 - **Request Headers**: `Content-Type: application/json` must be set for PUT endpoints.
 - **Success Response**: All endpoints return `HTTP 200 OK` with an empty response body when the operation succeeds.
 - **Error Response**: If a database error occurs, the server returns `HTTP 500 Internal Server Error` with a plain text description of the error.
