@@ -1,25 +1,10 @@
-use crate::error::{AppError, Result};
-use crate::serialize_into_request;
 use axum::Router;
 use axum::extract::State;
-use axum::response::{IntoResponse, Response};
 use axum::routing::get;
-use serde::Serialize;
+use furniture::error::Result;
+use furniture::portfolio::*;
 use sqlx::{Pool, Sqlite};
 
-#[derive(Serialize)]
-struct Project {
-    project_id: i64,
-    project_name: String,
-    note: String,
-}
-
-#[derive(Serialize)]
-struct PortfolioResponse {
-    portfolio: Vec<Project>,
-}
-
-serialize_into_request! {PortfolioResponse}
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new().route("/portfolio", get(get_portfolio))

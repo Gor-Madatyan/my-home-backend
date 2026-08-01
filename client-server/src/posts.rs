@@ -1,56 +1,13 @@
-use crate::error::{AppError, Result};
-use crate::{sanitize, serialize_into_request};
 use anyhow::anyhow;
 use axum::Router;
 use axum::extract::{Path, State};
-use axum::response::{IntoResponse, Response};
 use axum::routing::{get, put};
 use axum_extra::extract::Query;
-use serde::{Deserialize, Serialize};
+use furniture::error::Result;
+use furniture::sanitize;
 use sqlx::{Executor, Pool, Sqlite};
+use furniture::posts::*;
 
-#[derive(Serialize)]
-struct PostPreview {
-    post_id: i64,
-    title: String,
-    summary: String,
-    upload_date: String,
-    revision_date: String,
-    likes: i64,
-}
-
-#[derive(Serialize)]
-struct Post {
-    post_id: i64,
-    title: String,
-    summary: String,
-    upload_date: String,
-    revision_date: String,
-    body: String,
-    tags: sqlx::types::Json<Vec<String>>,
-    likes: i64,
-}
-
-#[derive(Deserialize)]
-struct PostsPreviewQuery {
-    page_size: u8,
-    page: u32,
-    search: Option<String>,
-    #[serde(default)]
-    tag: Vec<String>,
-}
-
-#[derive(Serialize)]
-struct PostsPreviewResponse {
-    posts: Vec<PostPreview>,
-}
-
-#[derive(Serialize)]
-struct PostResponse {
-    post: Post,
-}
-
-serialize_into_request! {PostsPreviewResponse, PostResponse}
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new()

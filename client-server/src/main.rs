@@ -1,6 +1,4 @@
 mod citations;
-mod error;
-pub mod macros;
 mod posts;
 mod portfolio;
 mod tags;

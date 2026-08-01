@@ -2,3 +2,5 @@
 .idea
 mydb.db
 .env
+.sqlx
+.aider*

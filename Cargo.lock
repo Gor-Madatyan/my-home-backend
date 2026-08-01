@@ -394,6 +394,14 @@ dependencies = [
 [[package]]
 name = "furniture"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+]
 
 [[package]]
 name = "futures-channel"
@@ -840,6 +848,7 @@ dependencies = [
  "anyhow",
  "axum",
  "axum-extra",
+ "furniture",
  "serde",
  "serde_json",
  "sqlx",

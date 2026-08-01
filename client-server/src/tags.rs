@@ -1,29 +1,10 @@
-use crate::error::{AppError, Result};
-use crate::serialize_into_request;
 use axum::Router;
 use axum::extract::{Query, State};
-use axum::response::{IntoResponse, Response};
 use axum::routing::get;
-use serde::{Deserialize, Serialize};
+use furniture::error::Result;
+use furniture::tags::*;
 use sqlx::{Pool, Sqlite};
 
-#[derive(Serialize)]
-struct Tag {
-    tag_name: String,
-    tag_id: i64
-}
-
-#[derive(Serialize)]
-struct TagsResponse {
-    tags: Vec<Tag>,
-}
-
-#[derive(Deserialize)]
-struct GetTagsQuery {
-    q: Option<String>,
-}
-
-serialize_into_request! {TagsResponse}
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new().route("/tags", get(get_tags))
