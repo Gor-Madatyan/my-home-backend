@@ -392,6 +392,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "furniture"
+version = "0.1.0"
+
+[[package]]
 name = "futures-channel"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -826,7 +830,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "my-home"
+name = "my-home-admin-server"
+version = "0.1.0"
+
+[[package]]
+name = "my-home-client-server"
 version = "0.1.0"
 dependencies = [
  "anyhow",
