@@ -4,7 +4,7 @@ use crate::error::AppError;
 use axum::response::{Response, IntoResponse};
 
 #[derive(Deserialize)]
-pub struct TagDraf {
+pub struct TagDraft {
     pub tag_name: String,
     pub tag_id: Option<u32>
 }

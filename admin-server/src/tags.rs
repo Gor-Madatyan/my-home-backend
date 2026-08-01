@@ -3,8 +3,8 @@ use axum::Router;
 use axum::extract::{Path, State};
 use axum::routing::{delete, put};
 use furniture::error::Result;
-use furniture::tags::TagDraf;
-use sqlx::{Acquire, Database, Pool, Sqlite};
+use furniture::tags::TagDraft;
+use sqlx::{Pool, Sqlite};
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new()
@@ -12,7 +12,7 @@ pub fn get_router() -> Router<Pool<Sqlite>> {
         .route("/tags/{tag_path}", delete(delete_tag))
 }
 
-async fn put_tag(State(pool): State<Pool<Sqlite>>, Json(draft): Json<TagDraf>) -> Result<()> {
+async fn put_tag(State(pool): State<Pool<Sqlite>>, Json(draft): Json<TagDraft>) -> Result<()> {
     if let Some(id) = draft.tag_id {
         sqlx::query!(
             "INSERT OR REPLACE INTO tags (tag_id, tag_name) VALUES (?, ?)",
