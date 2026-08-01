@@ -238,4 +238,4 @@ Delete a blog post by its numeric ID.
 
 - The server binds to `localhost:9090` unless configured otherwise.
 - The SQLite database used by the server is expected to already contain the required tables.
-- The `TagDraft` type name in the source code contains a typo; it is functionally identical to a tag upsert draft.
+- The `TagDraft` type in the furniture crate defines the request body for tag upsert operations.
