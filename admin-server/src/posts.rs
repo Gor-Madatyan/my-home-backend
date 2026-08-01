@@ -1,10 +1,10 @@
+use axum::Json;
 use axum::Router;
 use axum::extract::{Path, State};
 use axum::routing::{delete, put};
-use axum::Json;
 use furniture::error::Result;
 use furniture::posts::PostDraft;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Pool, Sqlite, SqliteConnection};
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new()
@@ -12,54 +12,35 @@ pub fn get_router() -> Router<Pool<Sqlite>> {
         .route("/posts/{post_path}", delete(delete_post))
 }
 
-async fn put_post(
-    State(pool): State<Pool<Sqlite>>,
-    Json(draft): Json<PostDraft>,
-) -> Result<()> {
+async fn put_post(State(pool): State<Pool<Sqlite>>, Json(draft): Json<PostDraft>) -> Result<()> {
     let mut tx = pool.begin().await?;
 
-    if let Some(id) = draft.post_id {
-        sqlx::query!(
-            "INSERT OR REPLACE INTO blog_posts (post_id, title, summary, upload_date, revision_date, body, likes) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            id,
-            draft.title,
-            draft.summary,
-            draft.upload_date,
-            draft.revision_date,
-            draft.body,
-            draft.likes
+    let post_id: u32 = if let Some(id) = draft.post_id {
+        sqlx::query_scalar!(
+            "INSERT OR REPLACE INTO blog_posts (post_id, title, summary, upload_date, revision_date, body, likes)
+             VALUES (?, ?, ?, ?, ?, ?, ?)
+             RETURNING post_id AS 'post_id:u32'",
+            id, draft.title, draft.summary, draft.upload_date, draft.revision_date, draft.body, draft.likes
         )
-        .execute(&mut *tx)
-        .await?;
+            .fetch_one(&mut *tx)
+            .await?
     } else {
-        sqlx::query!(
-            "INSERT OR REPLACE INTO blog_posts (title, summary, upload_date, revision_date, body, likes) VALUES (?, ?, ?, ?, ?, ?)",
-            draft.title,
-            draft.summary,
-            draft.upload_date,
-            draft.revision_date,
-            draft.body,
-            draft.likes
+        sqlx::query_scalar!(
+            "INSERT OR REPLACE INTO blog_posts (title, summary, upload_date, revision_date, body, likes)
+             VALUES (?, ?, ?, ?, ?, ?)
+             RETURNING post_id AS 'post_id:u32'",
+            draft.title, draft.summary, draft.upload_date, draft.revision_date, draft.body, draft.likes
         )
-        .execute(&mut *tx)
-        .await?;
-    }
-
-    let post_id: i64 = match draft.post_id {
-        Some(id) => id as i64,
-        None => {
-            let row = sqlx::query!("SELECT last_insert_rowid() AS id")
-                .fetch_one(&mut *tx)
-                .await?;
-            row.id
-        }
+            .fetch_one(&mut *tx)
+            .await?
     };
 
     for tag in split_tags(&draft.tags) {
-        let tag_id = crate::tags::create_tag(&pool, &tag).await?;
+        let tag_id = create_tag(&mut *tx, &tag).await?;
+
         sqlx::query!(
             "INSERT OR IGNORE INTO posts_tags (post_id, tag_id) VALUES (?, ?)",
-            post_id as u32,
+            post_id,
             tag_id
         )
         .execute(&mut *tx)
@@ -70,16 +51,10 @@ async fn put_post(
     Ok(())
 }
 
-async fn delete_post(
-    State(pool): State<Pool<Sqlite>>,
-    Path(post_path): Path<u32>,
-) -> Result<()> {
-    sqlx::query!(
-        "DELETE FROM blog_posts WHERE post_id = ?",
-        post_path
-    )
-    .execute(&pool)
-    .await?;
+async fn delete_post(State(pool): State<Pool<Sqlite>>, Path(post_path): Path<u32>) -> Result<()> {
+    sqlx::query!("DELETE FROM blog_posts WHERE post_id = ?", post_path)
+        .execute(&pool)
+        .await?;
     Ok(())
 }
 
@@ -88,4 +63,19 @@ fn split_tags(tags: &str) -> Vec<String> {
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .collect()
+}
+
+async fn create_tag(handle: &mut SqliteConnection, tag_name: &str) -> Result<u32> {
+    sqlx::query!("INSERT OR IGNORE INTO tags (tag_name) VALUES (?)", tag_name)
+        .execute(&mut *handle)
+        .await?;
+
+    let id: u32 = sqlx::query_scalar!(
+        "SELECT tag_id AS 'tag_id:u32' FROM tags WHERE tag_name = ?",
+        tag_name
+    )
+    .fetch_one(&mut *handle)
+    .await?;
+
+    Ok(id)
 }

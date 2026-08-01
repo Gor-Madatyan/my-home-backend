@@ -24,7 +24,8 @@ async fn get_post(
     let post = sqlx::query_as!(
         Post,
     "
-    SELECT  b.*, json_group_array(t.tag_name) FILTER (WHERE t.tag_name IS NOT NULL) AS 'tags!: sqlx::types::Json<Vec<String>>'
+    SELECT  b.post_id AS 'post_id:u32', b.likes AS 'likes:u32', b.title, b.summary, b.upload_date, b.revision_date, b.body,
+        json_group_array(t.tag_name) FILTER (WHERE t.tag_name IS NOT NULL) AS 'tags!: sqlx::types::Json<Vec<String>>'
     FROM blog_posts b
     LEFT JOIN posts_tags pt USING(post_id)
     LEFT JOIN tags t USING(tag_id)

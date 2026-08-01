@@ -15,14 +15,26 @@ pub struct PostPreview {
 
 #[derive(Serialize)]
 pub struct Post {
-    pub post_id: i64,
+    pub post_id: u32,
     pub title: String,
     pub summary: String,
     pub upload_date: String,
     pub revision_date: String,
     pub body: String,
     pub tags: sqlx::types::Json<Vec<String>>,
-    pub likes: i64,
+    pub likes: u32,
+}
+
+#[derive(Deserialize)]
+pub struct PostDraft {
+    pub post_id: Option<u32>,
+    pub title: String,
+    pub summary: String,
+    pub upload_date: String,
+    pub revision_date: String,
+    pub body: String,
+    pub tags: String,
+    pub likes: u32,
 }
 
 #[derive(Deserialize)]

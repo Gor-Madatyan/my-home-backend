@@ -4,7 +4,7 @@ use axum::extract::{Path, State};
 use axum::routing::{delete, put};
 use furniture::error::Result;
 use furniture::tags::TagDraf;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Acquire, Database, Pool, Sqlite};
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new()
@@ -39,23 +39,3 @@ async fn delete_tag(State(pool): State<Pool<Sqlite>>, Path(tag_path): Path<u32>)
     Ok(())
 }
 
-pub async fn create_tag(pool: &Pool<Sqlite>, tag_name: &str) -> Result<u32> {
-    let mut tx = pool.begin().await?;
-    sqlx::query!(
-        "INSERT OR IGNORE INTO tags (tag_name) VALUES (?)",
-        tag_name
-    )
-    .execute(&mut *tx)
-    .await?;
-
-    let row = sqlx::query!(
-        "SELECT tag_id FROM tags WHERE tag_name = ?",
-        tag_name
-    )
-    .fetch_one(&mut *tx)
-    .await?;
-
-    tx.commit().await?;
-
-    Ok(row.tag_id as u32)
-}
