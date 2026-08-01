@@ -40,19 +40,22 @@ async fn delete_tag(State(pool): State<Pool<Sqlite>>, Path(tag_path): Path<u32>)
 }
 
 pub async fn create_tag(pool: &Pool<Sqlite>, tag_name: &str) -> Result<u32> {
+    let mut tx = pool.begin().await?;
     sqlx::query!(
         "INSERT OR IGNORE INTO tags (tag_name) VALUES (?)",
         tag_name
     )
-    .execute(pool)
+    .execute(&mut *tx)
     .await?;
 
     let row = sqlx::query!(
         "SELECT tag_id FROM tags WHERE tag_name = ?",
         tag_name
     )
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await?;
+
+    tx.commit().await?;
 
     Ok(row.tag_id as u32)
 }
