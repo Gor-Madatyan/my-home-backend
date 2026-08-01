@@ -16,15 +16,28 @@ async fn put_citation(
     State(pool): State<Pool<Sqlite>>,
     Json(draft): Json<CitationDraft>,
 ) -> Result<()> {
-    sqlx::query!(
-        "INSERT OR REPLACE INTO citations (author, rizz, source, body) VALUES (?, ?, ?, ?)",
-        draft.author,
-        draft.rizz,
-        draft.source,
-        draft.body
-    )
-    .execute(&pool)
-    .await?;
+    if let Some(id) = draft.citation_id {
+        sqlx::query(
+            "INSERT OR REPLACE INTO citations (citation_id, author, rizz, source, body) VALUES (?, ?, ?, ?, ?)"
+        )
+        .bind(id)
+        .bind(&draft.author)
+        .bind(draft.rizz)
+        .bind(&draft.source)
+        .bind(&draft.body)
+        .execute(&pool)
+        .await?;
+    } else {
+        sqlx::query(
+            "INSERT OR REPLACE INTO citations (author, rizz, source, body) VALUES (?, ?, ?, ?)"
+        )
+        .bind(&draft.author)
+        .bind(draft.rizz)
+        .bind(&draft.source)
+        .bind(&draft.body)
+        .execute(&pool)
+        .await?;
+    }
     Ok(())
 }
 
