@@ -17,7 +17,7 @@ async fn get_tags(
     let tags = sqlx::query_as!(
         Tag,
         "
-    SELECT tag_id, tag_name FROM tags
+    SELECT tag_id AS 'tag_id:u32', tag_name FROM tags
     WHERE tag_name LIKE ?;
 ",
         format!("{}%",q.unwrap_or_default())

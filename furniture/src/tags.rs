@@ -3,10 +3,16 @@ use crate::serialize_into_request;
 use crate::error::AppError;
 use axum::response::{Response, IntoResponse};
 
+#[derive(Deserialize)]
+pub struct TagDraf {
+    pub tag_name: String,
+    pub tag_id: Option<u32>
+}
+
 #[derive(Serialize)]
 pub struct Tag {
     pub tag_name: String,
-    pub tag_id: i64
+    pub tag_id: u32
 }
 
 #[derive(Serialize)]

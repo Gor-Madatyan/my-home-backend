@@ -1,5 +1,6 @@
 mod citations;
 mod portfolio;
+mod tags;
 
 use sqlx::sqlite::SqlitePoolOptions;
 
@@ -12,6 +13,7 @@ async fn main() -> anyhow::Result<()> {
 
     let router = citations::get_router()
         .merge(portfolio::get_router())
+        .merge(tags::get_router())
         .with_state(connection);
 
     let listener = tokio::net::TcpListener::bind("localhost:9090").await?;
