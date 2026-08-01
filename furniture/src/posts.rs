@@ -7,41 +7,41 @@ use axum::response::{IntoResponse, Response};
 pub struct PostPreview {
     pub post_id: i64,
     pub title: String,
-    summary: String,
-    upload_date: String,
-    revision_date: String,
-    likes: i64,
+    pub summary: String,
+    pub upload_date: String,
+    pub revision_date: String,
+    pub likes: i64,
 }
 
 #[derive(Serialize)]
-struct Post {
-    post_id: i64,
-    title: String,
-    summary: String,
-    upload_date: String,
-    revision_date: String,
-    body: String,
-    tags: sqlx::types::Json<Vec<String>>,
-    likes: i64,
+pub struct Post {
+    pub post_id: i64,
+    pub title: String,
+    pub summary: String,
+    pub upload_date: String,
+    pub revision_date: String,
+    pub body: String,
+    pub tags: sqlx::types::Json<Vec<String>>,
+    pub likes: i64,
 }
 
 #[derive(Deserialize)]
-struct PostsPreviewQuery {
-    page_size: u8,
-    page: u32,
-    search: Option<String>,
+pub struct PostsPreviewQuery {
+    pub page_size: u8,
+    pub page: u32,
+    pub search: Option<String>,
     #[serde(default)]
-    tag: Vec<String>,
+    pub tag: Vec<String>,
 }
 
 #[derive(Serialize)]
-struct PostsPreviewResponse {
-    posts: Vec<PostPreview>,
+pub struct PostsPreviewResponse {
+    pub posts: Vec<PostPreview>,
 }
 
 #[derive(Serialize)]
-struct PostResponse {
-    post: Post,
+pub struct PostResponse {
+    pub post: Post,
 }
 
 serialize_into_request! {PostsPreviewResponse, PostResponse}
