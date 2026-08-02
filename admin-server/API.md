@@ -119,46 +119,20 @@ Delete a portfolio project by its numeric ID.
 
 ---
 
-## `PUT /tags`
 
-Upsert (insert or replace) a tag.
+## `DELETE /tags/{tag_name}`
 
-**Request Body**
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `tag_name` | string | Yes | Name of the tag |
-| `tag_id` | integer | No | If present, replaces the tag with this ID. If absent, a new tag is created. |
-
-**Example**
-
-```json
-{
-  "tag_id": 17,
-  "tag_name": "rust"
-}
-```
-
-**Responses**
-
-- `200 OK` – empty body on success
-- `500 Internal Server Error` – on database error
-
----
-
-## `DELETE /tags/{tag_path}`
-
-Delete a tag by its numeric ID.
+Delete a tag by its name.
 
 **Path Parameters**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `tag_path` | integer | ID of the tag to delete |
+| `tag_name` | string | Name of the tag to delete |
 
 **Example**
 
-`DELETE /tags/17`
+`DELETE /tags/rust`
 
 **Responses**
 
@@ -255,4 +229,3 @@ Delete a blog post by its numeric ID.
 
 - The server binds to `localhost:9090` unless configured otherwise.
 - The SQLite database used by the server is expected to already contain the required tables.
-- The `TagDraft` type in the furniture crate defines the request body for tag upsert operations.
