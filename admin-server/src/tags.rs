@@ -1,6 +1,6 @@
 use axum::extract::State;
 use axum::Router;
-use axum::extract::{Path, State};
+use axum::extract::{Path};
 use axum::routing::{delete, post};
 use furniture::error::Result;
 use sqlx::{Pool, Sqlite};
