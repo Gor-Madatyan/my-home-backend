@@ -155,6 +155,27 @@ Response 200:
 }
 ```
 
+### GET /portfolio/{id}
+
+Returns a single portfolio project.
+
+Path parameters:
+
+- `id` (integer): ID of the project.
+
+Response 200:
+
+```json
+{
+  "project": {
+    "project_id": 1,
+    "rizz": 3,
+    "project_name": "Project",
+    "note": "Note"
+  }
+}
+```
+
 ### GET /tags
 
 Returns a list of tags.
