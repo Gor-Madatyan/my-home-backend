@@ -120,26 +120,6 @@ Delete a portfolio project by its numeric ID.
 ---
 
 
-## `DELETE /tags/{tag_name}`
-
-Delete a tag by its name.
-
-**Path Parameters**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `tag_name` | string | Name of the tag to delete |
-
-**Example**
-
-`DELETE /tags/rust`
-
-**Responses**
-
-- `200 OK` – empty body on success
-- `500 Internal Server Error` – on database error
-
----
 
 ## `POST /tags/cleanup`
 

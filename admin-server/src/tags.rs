@@ -1,23 +1,13 @@
 use axum::extract::State;
 use axum::Router;
-use axum::extract::{Path};
-use axum::routing::{delete, post};
+use axum::routing::post;
 use furniture::error::Result;
 use sqlx::{Pool, Sqlite};
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
-    Router::new()
-        .route("/tags/{tag_name}", delete(delete_tag))
-        .route("/tags/cleanup", post(cleanup_tags))
+    Router::new().route("/tags/cleanup", post(cleanup_tags))
 }
 
-
-async fn delete_tag(State(pool): State<Pool<Sqlite>>, Path(tag_name): Path<String>) -> Result<()> {
-    sqlx::query!("DELETE FROM tags WHERE tag_name = ?", tag_name)
-        .execute(&pool)
-        .await?;
-    Ok(())
-}
 
 async fn cleanup_tags(State(pool): State<Pool<Sqlite>>) -> Result<()> {
     sqlx::query!(
