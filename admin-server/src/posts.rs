@@ -5,6 +5,7 @@ use axum::routing::{delete, put};
 use furniture::error::Result;
 use furniture::posts::PostDraft;
 use sqlx::{Pool, Sqlite, SqliteConnection};
+use crate::tags::clean_up_tags;
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new()
@@ -52,9 +53,17 @@ async fn put_post(State(pool): State<Pool<Sqlite>>, Json(draft): Json<PostDraft>
 }
 
 async fn delete_post(State(pool): State<Pool<Sqlite>>, Path(post_path): Path<u32>) -> Result<()> {
+    let mut tx = pool.begin().await?;
     sqlx::query!("DELETE FROM blog_posts WHERE post_id = ?", post_path)
-        .execute(&pool)
+        .execute(&mut *tx)
         .await?;
+
+    sqlx::query!("DELETE FROM posts_tags WHERE post_id = ?", post_path)
+        .execute(&mut *tx)
+        .await?;
+
+    clean_up_tags(&mut *tx).await?;
+    tx.commit().await?;
     Ok(())
 }
 

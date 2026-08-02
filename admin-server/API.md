@@ -119,25 +119,6 @@ Delete a portfolio project by its numeric ID.
 
 ---
 
-
-
-## `POST /tags/cleanup`
-
-Deletes all tags that are not associated with any blog post.
-
-**Processing Details**
-
-1. The server runs a single `DELETE` statement that removes rows from the `tags` table where no matching row exists in the `posts_tags` join table.
-2. The operation uses a `NOT EXISTS` subquery for efficiency.
-3. The endpoint does not accept a request body.
-
-**Responses**
-
-- `200 OK` – empty body on success
-- `500 Internal Server Error` – on database error
-
----
-
 ## `PUT /posts`
 
 Upsert (insert or replace) a blog post and manage its associated tags.

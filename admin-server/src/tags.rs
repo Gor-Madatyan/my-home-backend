@@ -1,15 +1,14 @@
-use axum::extract::State;
 use axum::Router;
-use axum::routing::post;
 use furniture::error::Result;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Executor, Pool, Sqlite};
 
 pub fn get_router() -> Router<Pool<Sqlite>> {
-    Router::new().route("/tags/cleanup", post(cleanup_tags))
+    Router::new()
 }
 
 
-async fn cleanup_tags(State(pool): State<Pool<Sqlite>>) -> Result<()> {
+
+pub async fn clean_up_tags<'a,E>(pool:E) -> Result<()> where E:Executor<'a,Database=Sqlite>{
     sqlx::query!(
         "DELETE FROM tags
          WHERE NOT EXISTS (
@@ -18,8 +17,7 @@ async fn cleanup_tags(State(pool): State<Pool<Sqlite>>) -> Result<()> {
              WHERE posts_tags.tag_id = tags.tag_id
          )"
     )
-    .execute(&pool)
-    .await?;
+        .execute(pool)
+        .await?;
     Ok(())
 }
-
