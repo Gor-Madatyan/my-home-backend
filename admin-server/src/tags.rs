@@ -9,7 +9,7 @@ use sqlx::{Pool, Sqlite};
 pub fn get_router() -> Router<Pool<Sqlite>> {
     Router::new()
         .route("/tags", put(put_tag))
-        .route("/tags/{tag_path}", delete(delete_tag))
+        .route("/tags/{tag_name}", delete(delete_tag))
 }
 
 async fn put_tag(State(pool): State<Pool<Sqlite>>, Json(draft): Json<TagDraft>) -> Result<()> {
@@ -32,8 +32,8 @@ async fn put_tag(State(pool): State<Pool<Sqlite>>, Json(draft): Json<TagDraft>) 
     Ok(())
 }
 
-async fn delete_tag(State(pool): State<Pool<Sqlite>>, Path(tag_path): Path<u32>) -> Result<()> {
-    sqlx::query!("DELETE FROM tags WHERE tag_id = ?", tag_path)
+async fn delete_tag(State(pool): State<Pool<Sqlite>>, Path(tag_name): Path<String>) -> Result<()> {
+    sqlx::query!("DELETE FROM tags WHERE tag_name = ?", tag_name)
         .execute(&pool)
         .await?;
     Ok(())

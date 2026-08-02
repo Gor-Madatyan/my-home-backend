@@ -197,6 +197,18 @@ Response 200:
 }
 ```
 
+### DELETE /tags/{tag_name}
+
+Deletes a tag by its name.
+
+Path parameters:
+
+- `tag_name` (string): name of the tag to delete. URL-encode the tag name when necessary.
+
+No request body.
+
+Response 200 (empty body).
+
 ## Error Responses
 
 All errors return HTTP 500 with a plain text error message.
