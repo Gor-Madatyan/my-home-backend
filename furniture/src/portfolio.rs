@@ -24,4 +24,10 @@ pub struct PortfolioResponse {
     pub portfolio: Vec<Project>,
 }
 
+#[derive(Serialize)]
+pub struct ProjectResponse {
+    pub project: Project,
+}
+
 serialize_into_request! {PortfolioResponse}
+serialize_into_request! {ProjectResponse}

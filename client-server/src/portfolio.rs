@@ -1,7 +1,6 @@
 use axum::Router;
 use axum::extract::{State, Path};
 use axum::routing::get;
-use axum::Json;
 use furniture::error::Result;
 use furniture::portfolio::*;
 use sqlx::{Pool, Sqlite};
@@ -27,7 +26,7 @@ async fn get_portfolio(State(pool): State<Pool<Sqlite>>) -> Result<PortfolioResp
     Ok(PortfolioResponse { portfolio })
 }
 
-async fn get_project(State(pool): State<Pool<Sqlite>>, Path(project_id): Path<u32>) -> Result<Json<Project>> {
+async fn get_project(State(pool): State<Pool<Sqlite>>, Path(project_id): Path<u32>) -> Result<ProjectResponse> {
     let project = sqlx::query_as!(
         Project,
         "
@@ -39,5 +38,5 @@ async fn get_project(State(pool): State<Pool<Sqlite>>, Path(project_id): Path<u3
     .fetch_one(&pool)
     .await?;
 
-    Ok(Json(project))
+    Ok(ProjectResponse { project })
 }
