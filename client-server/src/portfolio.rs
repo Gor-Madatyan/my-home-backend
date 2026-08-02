@@ -17,7 +17,7 @@ async fn get_portfolio(State(pool): State<Pool<Sqlite>>) -> Result<PortfolioResp
         Project,
         "
         SELECT project_id AS 'project_id:u32', rizz AS 'rizz:u32', project_name, note FROM portfolio
-        ORDER BY rizz
+        ORDER BY rizz DESC
 "
     )
     .fetch_all(&pool)
