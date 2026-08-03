@@ -27,7 +27,7 @@ async fn main() -> anyhow::Result<()> {
             &api_key,
         )?);
 
-    let listener = tokio::net::TcpListener::bind("localhost:9090").await?;
+    let listener = tokio::net::TcpListener::bind("localhost:1235").await?;
     axum::serve(listener, router).await?;
     Ok(())
 }

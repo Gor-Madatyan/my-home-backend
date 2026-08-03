@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
         .with_state(connection)
         .layer(cors_layer);
 
-    let listener = tokio::net::TcpListener::bind("localhost:8080").await?;
+    let listener = tokio::net::TcpListener::bind("localhost:1234").await?;
     axum::serve(listener, router).await?;
     Ok(())
 }
