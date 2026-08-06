@@ -11,7 +11,7 @@ use tower_http::validate_request::ValidateRequestHeaderLayer;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv()?;
-    let api_key = env::var("API_KEY").expect("API_KEY must be set");
+    let api_key = env::var("GOR_API_KEY").expect("API_KEY must be set");
     let connection = SqlitePoolOptions::new()
         .max_connections(5)
         .connect("sqlite:mydb.db")
